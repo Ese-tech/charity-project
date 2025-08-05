@@ -2,6 +2,7 @@ import express,{Application, Request, Response} from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import {connectDB} from './config/db.js';
+import userRoutes from './routes/userRoutes.js';
 
 dotenv.config();
 const app: Application = express();
@@ -21,6 +22,8 @@ app.use(express.json());
 app.get('/', (req: Request, res: Response) => {
     res.send('Weaving Futures API is running!');
 });
+
+app.use('/api/users', userRoutes); // <-- Use the new route
 
 // Start the server
 app.listen(PORT, () => {
