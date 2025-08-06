@@ -1,11 +1,15 @@
 import express from 'express';
-import { registerUser, loginUser, getUserProfile, updateUserProfile } from '../controllers/userController'; // Import new functions
-import { protect } from '../middleware/authMiddleware'; // Import the middleware
+import { registerUser, loginUser, getUserProfile, updateUserProfile } from '../controllers/userController';
+import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.route('/profile').get(protect, getUserProfile).put(protect, updateUserProfile);
+
+// Profile route using the route() method for multiple verbs
+router.route('/profile')
+  .get(protect, getUserProfile)
+  .put(protect, updateUserProfile);
 
 export default router;
