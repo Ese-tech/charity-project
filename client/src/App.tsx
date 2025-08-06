@@ -1,14 +1,16 @@
 import React from 'react';
-// import Register from './components/Register'; // Comment out or remove
-import Login from './component/Login'; // Import the Login component
+import { BrowserRouter as Router } from 'react-router-dom';
+import AppRoutes from './routes/Routes';
+import { AuthProvider } from './AuthContext'; // Import AuthProvider
 
 function App() {
   return (
-    <div className="App">
-      <Login /> {/* Render the Login component */}
-    </div>
+    <Router>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </Router>
   );
 }
 
 export default App;
-
