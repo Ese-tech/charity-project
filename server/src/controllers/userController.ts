@@ -1,5 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
-import { User } from '../models/User';
+import { Request, Response } from 'express';
+import { User, IUser } from '../models/User'; // Ensure IUser is imported if used in controller
+import { AuthRequest } from '../middleware/authMiddleware'; // <-- THIS IS THE MISSING IMPORT
+import bcrypt from 'bcryptjs'; // Needed for password comparison in User model, but good to have if any future direct use
+import jwt from 'jsonwebtoken'; // Needed for token generation in User model, but good to have if any future direct use
+
 
 // @desc    Register a new user
 // @route   POST /api/users/register
@@ -65,5 +69,52 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     } else {
       res.status(500).json({ message: 'Server error' });
     }
+  }
+};
+
+// @desc    Get user profile
+// @route   GET /api/users/profile
+// @access  Private
+export const getUserProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+  const user = req.user; // req.user is populated by the protect middleware
+
+  if (user) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+    });
+  } else {
+    res.status(404).json({ message: 'User not found' });
+  }
+};
+
+// @desc    Update user profile
+// @route   PUT /api/users/profile
+// @access  Private
+export const updateUserProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+  const user = req.user; // req.user is populated by the protect middleware
+
+  if (user) {
+    const { name, email, password } = req.body;
+
+    user.name = name || user.name;
+    user.email = email || user.email;
+
+    // Only update password if a new one is provided
+    if (password) {
+      user.password = password; // The pre('save') middleware will hash this
+    }
+
+    const updatedUser = await user.save();
+
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      token: updatedUser.generateAuthToken(), // Generate a new token if profile is updated
+    });
+  } else {
+    res.status(404).json({ message: 'User not found' });
   }
 };
