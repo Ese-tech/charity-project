@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express'; // Added NextFunction for completeness
 import { User } from '../models/User';
 
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
@@ -12,8 +12,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    // This is the correct way to create a user with Mongoose
-    // It triggers the UserSchema.pre('save') middleware to hash the password
+    // *** CRITICAL CHANGE HERE: Use User.create() for secure password hashing ***
     const user = await User.create({
       name,
       email,
@@ -21,6 +20,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
     });
 
     if (user) {
+      // Return relevant user data, but NOT the password
       res.status(201).json({
         _id: user._id,
         name: user.name,
@@ -31,8 +31,10 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
     }
   } catch (error) {
     if (error instanceof Error) {
+      // For database or validation errors, send the specific message
       res.status(500).json({ message: error.message });
     } else {
+      // For unknown errors
       res.status(500).json({ message: 'Server error' });
     }
   }
