@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext, type ReactNode } from 'react';
+import React, { createContext, useState,  useContext, type ReactNode } from 'react';
 
 interface UserInfo {
   _id: string;
@@ -11,42 +11,39 @@ interface AuthContextType {
   userInfo: UserInfo | null;
   login: (data: UserInfo) => void;
   logout: () => void;
+  updateUserInfo: (data: UserInfo) => void; // <-- New function to update user info
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(() => {
-    // Initialize from localStorage on first load
-    const storedUserInfo = localStorage.getItem('userInfo');
-    return storedUserInfo ? JSON.parse(storedUserInfo) : null;
+    const storedUser = localStorage.getItem('userInfo');
+    return storedUser ? JSON.parse(storedUser) : null;
   });
-
-  // Store userInfo in localStorage whenever it changes
-  useEffect(() => {
-    if (userInfo) {
-      localStorage.setItem('userInfo', JSON.stringify(userInfo));
-    } else {
-      localStorage.removeItem('userInfo');
-    }
-  }, [userInfo]);
 
   const login = (data: UserInfo) => {
     setUserInfo(data);
+    localStorage.setItem('userInfo', JSON.stringify(data));
   };
 
   const logout = () => {
     setUserInfo(null);
+    localStorage.removeItem('userInfo');
+  };
+  
+  const updateUserInfo = (data: UserInfo) => {
+    setUserInfo(data);
+    localStorage.setItem('userInfo', JSON.stringify(data));
   };
 
   return (
-    <AuthContext.Provider value={{ userInfo, login, logout }}>
+    <AuthContext.Provider value={{ userInfo, login, logout, updateUserInfo }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook to use the AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

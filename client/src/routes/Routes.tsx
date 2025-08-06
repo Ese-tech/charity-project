@@ -1,31 +1,22 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Register from '../component/Register';
-import Login from '../component/Login';
-import Dashboard from '../component/Dashboard';
-import { useAuth } from '../AuthContext'; // Import useAuth
+import { Routes, Route } from 'react-router-dom';
+import PrivateRoute from './PrivateRoute';
+import Login from '../components/Login';
+import Register from '../components/Register';
+import Dashboard from '../components/Dashboard';
+import Profile from '../components/Profile';
 
-// A simple PrivateRoute component
-const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { userInfo } = useAuth();
-  return userInfo ? <>{children}</> : <Navigate to="/login" replace />;
-};
-
-const AppRoutes: React.FC = () => {
+const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
-      <Route
-        path="/dashboard"
-        element={
-          <PrivateRoute>
-            <Dashboard />
-          </PrivateRoute>
-        }
-      />
-      {/* Redirect root to login for now */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/register" element={<Register />} />
+
+      {/* Protected Routes - Now using PrivateRoute as a wrapper */}
+      <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+      <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+
+      {/* Default route redirects to dashboard if logged in */}
+      <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
     </Routes>
   );
 };
