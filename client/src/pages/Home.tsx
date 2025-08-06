@@ -1,19 +1,15 @@
+// client/src/components/Home.tsx
+
 import React from 'react';
-import Header from '../components/Header';
 import Hero from '../components/Hero';
 import ImpactSections from '../components/ImpactSections';
-import Footer from '../components/Footer';
 
 const Home = () => {
   return (
-    <>
-      <Header />
+    <main>
       <Hero />
-      <main>
-        <ImpactSections />
-      </main>
-      <Footer />
-    </>
+      <ImpactSections />
+    </main>
   );
 };
 

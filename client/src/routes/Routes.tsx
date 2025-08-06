@@ -1,9 +1,13 @@
+// client/src/routes/Routes.tsx
+
 import { Routes, Route } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
+import Layout from '../components/Layout';
 import Login from '../components/Login';
 import Register from '../components/Register';
 import Dashboard from '../components/Dashboard';
 import Profile from '../components/Profile';
+import Home from '../pages/Home'; // Import the Home component
 
 const AppRoutes = () => {
   return (
@@ -11,12 +15,13 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Protected Routes - Now using PrivateRoute as a wrapper */}
-      <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-      <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-
-      {/* Default route redirects to dashboard if logged in */}
-      <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+      {/* This is the new Layout Route */}
+      <Route element={<Layout />}>
+        {/* All nested routes will now be rendered inside the Layout */}
+        <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+      </Route>
     </Routes>
   );
 };
