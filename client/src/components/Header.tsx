@@ -3,6 +3,7 @@ import { Search, Menu, X, User } from 'lucide-react';
 import { mockData } from './mock';
 import DonationModal from './DonationModal';
 import { useNavigate } from 'react-router-dom'; // <-- Import useNavigate
+import { useToast } from './ToastProvider';
 
 interface MenuItem {
   name: string;
@@ -13,16 +14,18 @@ interface MenuItem {
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [donationModal, setDonationModal] = useState<{ isOpen: boolean; type: 'general' | 'disaster' | 'sponsor'; childId?: string }>({
+  const [donationModal, setDonationModal] = useState<{ isOpen: boolean; type: 'general' | 'disaster' | 'sponsor' }>({
     isOpen: false,
     type: 'general',
   });
-  const navigate = useNavigate(); // <-- Initialize the hook
+  const navigate = useNavigate();
+  const { showToast } = useToast(); // <-- Initialize the hook
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Searching for:', searchQuery);
-    alert(`Searching for: ${searchQuery}`);
+    // Replace alert() with a toast notification
+    showToast(`Searching for: "${searchQuery}"`, 'info');
   };
 
   const handleMenuClick = (item: MenuItem) => {
@@ -30,9 +33,10 @@ const Header = () => {
     if (item.name === 'Donate') {
       setDonationModal({ isOpen: true, type: 'general' });
     } else if (item.name === 'Sponsor a Child') {
-      navigate('/sponsor'); // <-- Use navigate to go to the correct page
+      navigate('/sponsor');
     } else {
-      alert(`Navigating to ${item.name} page...`);
+      // Replace alert() with a toast notification
+      showToast(`Navigating to the ${item.name} page...`, 'info');
     }
     setIsMenuOpen(false);
   };

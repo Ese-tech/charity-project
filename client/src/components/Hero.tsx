@@ -3,22 +3,24 @@ import { Button } from './ui/button';
 import { ArrowRight } from 'lucide-react';
 import { mockData } from './mock';
 import DonationModal from './DonationModal';
+import { useToast } from './ToastProvider';
 
 const Hero = () => {
-      const [donationModal, setDonationModal] = useState<{ isOpen: boolean; type: 'general' | 'disaster' | 'sponsor' }>({
-  isOpen: false,
-  type: 'general',
-});
+  const [donationModal, setDonationModal] = useState<{ isOpen: boolean; type: 'general' | 'disaster' | 'sponsor' }>({
+    isOpen: false,
+    type: 'general',
+  });
+  const { showToast } = useToast(); // <-- Initialize the hook
 
   const handleDonate = () => {
-    
     console.log('Donate button clicked');
-     setDonationModal({ isOpen: true, type: 'general' });
+    setDonationModal({ isOpen: true, type: 'general' });
   };
 
   const handleLearnMore = () => {
     console.log('Learn more clicked');
-    alert('Showing partnership information...');
+    // Replace alert() with a toast notification
+    showToast('Showing partnership information...', 'info');
   };
 
   return (
