@@ -5,8 +5,6 @@ import DonationModal from '../components/DonationModal';
 // Import the newly added components
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 
 // Define the interface for the Child data fetched from the API
 interface Child {
@@ -77,38 +75,34 @@ const SponsorPage = () => {
   }
 
   return (
-    <>
-      <Header />
-      <main className="container mx-auto py-8">
-        <h1 className="text-4xl font-bold text-center mb-12">Sponsor a Child</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {children.map((child) => (
-            <Card key={child.id} className="w-full max-w-sm mx-auto">
-              {child.photo_url && (
-                <img src={child.photo_url} alt={child.name} className="w-full h-48 object-cover rounded-t-lg" />
-              )}
-              <CardHeader>
-                <CardTitle>{child.name}</CardTitle>
-                <p className="text-sm text-gray-500">{child.country}</p>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700 mb-4">{child.bio}</p>
-                <Button onClick={() => handleSponsorClick(child.id)} className="w-full">
-                  Sponsor {child.name}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </main>
-      <Footer />
+    <main className="container mx-auto py-8">
+      <h1 className="text-4xl font-bold text-center mb-12">Sponsor a Child</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {children.map((child) => (
+          <Card key={child.id} className="w-full max-w-sm mx-auto">
+            {child.photo_url && (
+              <img src={child.photo_url} alt={child.name} className="w-full h-48 object-cover rounded-t-lg" />
+            )}
+            <CardHeader>
+              <CardTitle>{child.name}</CardTitle>
+              <p className="text-sm text-gray-500">{child.country}</p>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-700 mb-4">{child.bio}</p>
+              <Button onClick={() => handleSponsorClick(child.id)} className="w-full">
+                Sponsor {child.name}
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
       <DonationModal
         isOpen={donationModal.isOpen}
         onClose={() => setDonationModal({ ...donationModal, isOpen: false })}
         type={donationModal.type}
         childId={donationModal.childId}
       />
-    </>
+    </main>
   );
 };
 
