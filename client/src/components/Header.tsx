@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-// import { Button } from './ui/button'; // Button is not directly used in Header's JSX, so we can remove this import
 import { Search, Menu, X, User } from 'lucide-react';
 import { mockData } from './mock';
 import DonationModal from './DonationModal';
+import { useNavigate } from 'react-router-dom'; // <-- Import useNavigate
 
-// Define an interface for menu items to give 'item' a type
 interface MenuItem {
   name: string;
   href: string;
@@ -14,27 +13,26 @@ interface MenuItem {
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [donationModal, setDonationModal] = useState<{ isOpen: boolean; type: 'general' | 'disaster' | 'sponsor' }>({
-  isOpen: false,
-  type: 'general',
-});
+  const [donationModal, setDonationModal] = useState<{ isOpen: boolean; type: 'general' | 'disaster' | 'sponsor'; childId?: string }>({
+    isOpen: false,
+    type: 'general',
+  });
+  const navigate = useNavigate(); // <-- Initialize the hook
 
-  const handleSearch = (e: React.FormEvent) => { // Added type for 'e'
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Searching for:', searchQuery);
-    // In a real app, this would trigger a search results page or component
-    alert(`Searching for: ${searchQuery}`); // Consider replacing alert() with a custom modal/toast
+    alert(`Searching for: ${searchQuery}`);
   };
 
-  const handleMenuClick = (item: MenuItem) => { // Added type for 'item'
+  const handleMenuClick = (item: MenuItem) => {
     console.log(`Navigating to: ${item.name}`);
     if (item.name === 'Donate') {
       setDonationModal({ isOpen: true, type: 'general' });
     } else if (item.name === 'Sponsor a Child') {
-      setDonationModal({ isOpen: true, type: 'sponsor' });
+      navigate('/sponsor'); // <-- Use navigate to go to the correct page
     } else {
-      // In a real app, use react-router-dom's navigate for internal links
-      alert(`Navigating to ${item.name} page...`); // Consider replacing alert()
+      alert(`Navigating to ${item.name} page...`);
     }
     setIsMenuOpen(false);
   };
@@ -126,7 +124,7 @@ const Header = () => {
           </div>
         )}
       </div>
-      <DonationModal 
+      <DonationModal
         isOpen={donationModal.isOpen}
         onClose={() => setDonationModal({ isOpen: false, type: 'general' })}
         type={donationModal.type}

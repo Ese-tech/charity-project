@@ -9,10 +9,11 @@ interface DonationModalProps {
   isOpen: boolean;
   onClose: () => void;
   type?: 'general' | 'disaster' | 'sponsor';
+  childId?: string; // <-- Add the childId prop
 }
 
-const DonationModal: React.FC<DonationModalProps> = ({ isOpen, onClose, type = 'general' }) => {
-  const SPONSORSHIP_AMOUNT = 39; // <-- Define a constant for the sponsorship amount
+const DonationModal: React.FC<DonationModalProps> = ({ isOpen, onClose, type = 'general', childId }) => {
+  const SPONSORSHIP_AMOUNT = 39;
   const [selectedAmount, setSelectedAmount] = useState<number>(50);
   const [customAmount, setCustomAmount] = useState<string>('');
   const [donationType, setDonationType] = useState<'monthly' | 'one-time'>('monthly');
@@ -56,7 +57,8 @@ const DonationModal: React.FC<DonationModalProps> = ({ isOpen, onClose, type = '
       if (type === 'sponsor') {
         const sponsorshipData = {
           sponsorInfo: { ...formData },
-          monthlyAmount: amount, // <-- Now uses the correct amount
+          monthlyAmount: amount,
+          childId: childId, // <-- Include the childId in the payload
         };
         await apiService.sponsorship.create(sponsorshipData);
         alert('Thank you for sponsoring a child!');

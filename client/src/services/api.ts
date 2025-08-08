@@ -10,14 +10,14 @@ import type {
 
 // To fix the "Cannot find name 'process'" error in TypeScript
 // The `npm install` command above is the primary fix. This line is a fallback.
-declare var process: {
-  env: {
-    REACT_APP_BACKEND_URL: string;
-  };
-};
+// declare var process: {
+//   env: {
+//     REACT_APP_BACKEND_URL: string;
+//   };
+// };
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
-const API_BASE = `${BACKEND_URL}/api`;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const API_BASE = `${BACKEND_URL}`;
 
 const apiClient = axios.create({
   baseURL: API_BASE,
@@ -29,9 +29,21 @@ const apiClient = axios.create({
 export const apiService = {
   donations: {
     create: async (donationData: DonationData) => {
-      const response = await apiClient.post('/donations', donationData);
-      return response.data;
-    },
+    // Construct the payload to match the backend's expected structure
+    const payload = {
+      amount: donationData.amount,
+      type: donationData.type,
+      category: donationData.category,
+      name: `${donationData.firstName} ${donationData.lastName}`,
+      email: donationData.email,
+      phone: donationData.phone,
+      paymentMethod: donationData.paymentMethod,
+    };
+    
+    // Now send the corrected payload
+    const response = await apiClient.post('/donations', payload);
+    return response.data;
+  },
     
     getImpactStats: async () => {
       const response = await apiClient.get<ImpactStats>('/donations/impact-stats');
@@ -54,9 +66,18 @@ export const apiService = {
     },
     
     create: async (sponsorshipData: SponsorshipData) => {
-      const response = await apiClient.post('/sponsorships', sponsorshipData);
-      return response.data;
-    },
+    // Construct the payload to match the backend's expected structure
+    const payload = {
+      amount: sponsorshipData.monthlyAmount,
+      name: `${sponsorshipData.sponsorInfo.firstName} ${sponsorshipData.sponsorInfo.lastName}`,
+      email: sponsorshipData.sponsorInfo.email,
+      child_id: sponsorshipData.childId, // Assuming childId is part of SponsorshipData
+    };
+    
+    // Now send the corrected payload
+    const response = await apiClient.post('/sponsorships', payload);
+    return response.data;
+  },
     
     getStats: async () => {
       const response = await apiClient.get('/sponsorship/stats');

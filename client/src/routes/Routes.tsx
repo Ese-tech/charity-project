@@ -8,6 +8,7 @@ import Register from '../components/Register';
 import Dashboard from '../components/Dashboard';
 import Profile from '../components/Profile';
 import Home from '../pages/Home'; // Import the Home component
+import SponsorPage from '../pages/SponsorPage';
 
 const AppRoutes = () => {
   return (
@@ -21,6 +22,7 @@ const AppRoutes = () => {
         <Route path="/" element={<Home />} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+        <Route path="/sponsor" element={<SponsorPage />} />
       </Route>
     </Routes>
   );
