@@ -3,10 +3,10 @@ import { useState, useEffect } from 'react';
 import DonationModal from '../components/DonationModal';
 
 // Import the newly added components
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui card';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 // Define the interface for the Child data fetched from the API
 interface Child {
@@ -57,13 +57,6 @@ const SponsorPage = () => {
       isOpen: true,
       type: 'sponsor',
       childId: childId,
-    });
-  };
-  
-  const closeModal = () => {
-    setDonationModal({
-        ...donationModal,
-        isOpen: false,
     });
   };
 
