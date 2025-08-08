@@ -1,3 +1,4 @@
+// client/src/services/api.ts
 import axios from 'axios';
 import type { 
   DonationData, 
@@ -6,7 +7,7 @@ import type {
   Child, 
   Story, 
   ImpactStats,
-} from '../types/apiTypes'; // Assuming you have a types file for better organization
+} from '../types/apiTypes';
 
 // To fix the "Cannot find name 'process'" error in TypeScript
 // The `npm install` command above is the primary fix. This line is a fallback.
@@ -34,10 +35,12 @@ export const apiService = {
       amount: donationData.amount,
       type: donationData.type,
       category: donationData.category,
-      name: `${donationData.firstName} ${donationData.lastName}`,
+      firstName: donationData.firstName, // <-- Use separate fields
+      lastName: donationData.lastName,   // <-- Use separate fields
       email: donationData.email,
       phone: donationData.phone,
       paymentMethod: donationData.paymentMethod,
+      currency: donationData.currency,
     };
     
     // Now send the corrected payload
@@ -58,24 +61,26 @@ export const apiService = {
 
   sponsorship: {
     getAvailableChildren: async (limit: number = 12, region: string | null = null) => {
+      // The backend now correctly handles this endpoint
       const params = new URLSearchParams({ limit: limit.toString() });
       if (region) params.append('region', region);
-      
+
       const response = await apiClient.get<Child[]>(`/children/available?${params}`);
       return response.data;
     },
-    
+
     create: async (sponsorshipData: SponsorshipData) => {
-    // Construct the payload to match the backend's expected structure
+    // Corrected payload to match the new flat backend model
     const payload = {
-      amount: sponsorshipData.monthlyAmount,
-      name: `${sponsorshipData.sponsorInfo.firstName} ${sponsorshipData.sponsorInfo.lastName}`,
-      email: sponsorshipData.sponsorInfo.email,
-      child_id: sponsorshipData.childId, // Assuming childId is part of SponsorshipData
+      amount: sponsorshipData.monthlyAmount, // <-- Corrected property name
+      firstName: sponsorshipData.firstName, // <-- Use the new flat structure
+      lastName: sponsorshipData.lastName,
+      email: sponsorshipData.email,
+      child_id: sponsorshipData.childId, // <-- Corrected property name
     };
-    
+
     // Now send the corrected payload
-    const response = await apiClient.post('/sponsorships', payload);
+    const response = await apiClient.post('/sponsorships', payload); // <-- This route now exists
     return response.data;
   },
     

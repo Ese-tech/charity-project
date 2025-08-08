@@ -1,20 +1,12 @@
 // client/src/pages/SponsorPage.tsx
 import { useState, useEffect } from 'react';
 import DonationModal from '../components/DonationModal';
+import { apiService } from '../services/api';
+import type { Child } from '../types/apiTypes';
 
 // Import the newly added components
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-
-// Define the interface for the Child data fetched from the API
-interface Child {
-  id: string;
-  name: string;
-  country: string;
-  age: number;
-  photo_url?: string;
-  bio?: string;
-}
 
 const SponsorPage = () => {
   const [children, setChildren] = useState<Child[]>([]);
@@ -34,11 +26,7 @@ const SponsorPage = () => {
   useEffect(() => {
     const fetchChildren = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/children/');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data: Child[] = await response.json();
+        const data: Child[] = await apiService.sponsorship.getAvailableChildren();
         setChildren(data);
       } catch (e: any) {
         setError(e.message);
@@ -49,6 +37,7 @@ const SponsorPage = () => {
 
     fetchChildren();
   }, []); // The empty array ensures this effect runs only once when the component mounts
+
 
   const handleSponsorClick = (childId: string) => {
     setDonationModal({
@@ -79,17 +68,17 @@ const SponsorPage = () => {
       <h1 className="text-4xl font-bold text-center mb-12">Sponsor a Child</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {children.map((child) => (
-          <Card key={child.id} className="w-full max-w-sm mx-auto">
-            {child.photo_url && (
-              <img src={child.photo_url} alt={child.name} className="w-full h-48 object-cover rounded-t-lg" />
+          <Card key={child._id} className="w-full max-w-sm mx-auto">
+            {child.photoUrl && (
+              <img src={child.photoUrl} alt={child.name} className="w-full h-48 object-cover rounded-t-lg" />
             )}
             <CardHeader>
               <CardTitle>{child.name}</CardTitle>
               <p className="text-sm text-gray-500">{child.country}</p>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-700 mb-4">{child.bio}</p>
-              <Button onClick={() => handleSponsorClick(child.id)} className="w-full">
+              <p className="text-gray-700 mb-4">{child.story}</p>
+              <Button onClick={() => handleSponsorClick(child._id)} className="w-full">
                 Sponsor {child.name}
               </Button>
             </CardContent>

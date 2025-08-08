@@ -1,4 +1,6 @@
-// User interface for authentication
+// client/src/types/apiTypes.ts
+
+
 export interface User {
   _id: string;
   name: string;
@@ -13,6 +15,7 @@ export interface DonationData {
   email: string;
   phone?: string;
   amount: number;
+  currency?: string; // Optional, default to 'USD'
   type: 'monthly' | 'one-time';
   category: 'general' | 'disaster' | 'sponsor';
   paymentMethod: string;
@@ -33,18 +36,15 @@ export interface DonationResponse {
 
 // Sponsorship types
 export interface SponsorshipData {
-  sponsorInfo: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone?: string;
-  };
-  monthlyAmount: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  monthlyAmount: number; // Corrected to match the backend payload
   childId?: string;
 }
 
 export interface Child {
-  _id: string;
+  _id: string; // <-- Corrected property name to '_id'
   name: string;
   age: number;
   country: string;

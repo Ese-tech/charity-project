@@ -1,3 +1,4 @@
+//client/src/components/DonationModal.tsx
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { X, Heart, Shield, Users } from 'lucide-react';
@@ -41,7 +42,10 @@ const DonationModal: React.FC<DonationModalProps> = ({ isOpen, onClose, type = '
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // client/src/components/DonationModal.tsx
+// ... (rest of the file)
+
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     // Determine the correct amount based on the donation type
@@ -56,9 +60,10 @@ const DonationModal: React.FC<DonationModalProps> = ({ isOpen, onClose, type = '
     try {
       if (type === 'sponsor') {
         const sponsorshipData = {
-          sponsorInfo: { ...formData },
+          // Corrected payload to be a flat object
+          ...formData, // <-- Spreads firstName, lastName, email, and phone
           monthlyAmount: amount,
-          childId: childId, // <-- Include the childId in the payload
+          childId: childId,
         };
         await apiService.sponsorship.create(sponsorshipData);
         alert('Thank you for sponsoring a child!');
@@ -66,6 +71,7 @@ const DonationModal: React.FC<DonationModalProps> = ({ isOpen, onClose, type = '
         const donationData = {
           ...formData,
           amount,
+          currency: "USD",
           type: donationType,
           category: type,
         };
@@ -79,8 +85,9 @@ const DonationModal: React.FC<DonationModalProps> = ({ isOpen, onClose, type = '
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }
 
+// ... (rest of the file)
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
