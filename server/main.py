@@ -1,71 +1,66 @@
+# main.py
+
 from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import MongoClient
 from pydantic import BaseModel, Field
-from typing import Optional
+from bson import ObjectId
+from typing import List, Optional
 
-# Configuration
-MONGO_DETAILS = "mongodb://localhost:27017" # Update with your MongoDB connection string
-DATABASE_NAME = "charity_db"
+# --- Assume your existing imports and database setup are here ---
+# e.g., app = FastAPI(), client = MongoClient(...)
 
-app = FastAPI()
+# Pydantic model for the child data
+# We use ObjectId for the ID and then convert it to a string for the API response.
+class PyObjectId(ObjectId):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
 
-# CORS Middleware (important for connecting frontend and backend)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], # In production, replace "*" with your frontend URL
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+    @classmethod
+    def validate(cls, v):
+        if not ObjectId.is_valid(v):
+            raise ValueError("Invalid ObjectId")
+        return ObjectId(v)
 
-# MongoDB Connection
-@app.on_event("startup")
-async def startup_db_client():
-    app.mongodb_client = AsyncIOMotorClient(MONGO_DETAILS)
-    app.mongodb = app.mongodb_client[DATABASE_NAME]
+    @classmethod
+    def __modify_schema__(cls, field_schema):
+        field_schema.update(type="string")
 
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    app.mongodb_client.close()
-
-# Models
-class Donation(BaseModel):
-    amount: float = Field(..., gt=0)
+class Child(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: str
-    email: str
-    message: Optional[str] = None
-    type: str
+    country: str
+    age: int
+    # Add other fields you have for a child here
 
-class Sponsorship(BaseModel):
-    amount: float = Field(..., gt=0)
-    name: str
-    email: str
-    message: Optional[str] = None
-    child_id: str
+    class Config:
+        json_encoders = {ObjectId: str}
+        allow_population_by_field_name = True
+        schema_extra = {
+            "example": {
+                "name": "Maria",
+                "country": "Kenya",
+                "age": 8,
+            }
+        }
 
-class Newsletter(BaseModel):
-    email: str
+# --- New endpoint to get all children ---
+@app.get("/children/", response_model=List[Child])
+async def get_children():
+    children_collection = db.children  # Assuming 'db' is your MongoDB database instance
+    children = []
+    async for child_data in children_collection.find():
+        children.append(Child(**child_data))
+    return children
 
-# Endpoints
-@app.post("/donations")
-async def create_donation(donation: Donation):
-    donation_collection = app.mongodb.donations
-    result = await donation_collection.insert_one(donation.dict())
-    return {"message": "Donation created successfully", "id": str(result.inserted_id)}
+# --- If you want to get a single child by ID ---
+@app.get("/children/{child_id}", response_model=Child)
+async def get_child(child_id: str):
+    children_collection = db.children
+    if not ObjectId.is_valid(child_id):
+        raise HTTPException(status_code=400, detail="Invalid child ID")
 
-@app.post("/sponsorships")
-async def create_sponsorship(sponsorship: Sponsorship):
-    sponsorship_collection = app.mongodb.sponsorships
-    result = await sponsorship_collection.insert_one(sponsorship.dict())
-    return {"message": "Sponsorship created successfully", "id": str(result.inserted_id)}
-
-@app.post("/newsletter")
-async def subscribe_newsletter(newsletter: Newsletter):
-    newsletter_collection = app.mongodb.newsletter
-    result = await newsletter_collection.insert_one(newsletter.dict())
-    return {"message": "Subscription successful", "id": str(result.inserted_id)}
-
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the FastAPI Backend!"}
+    child_data = await children_collection.find_one({"_id": ObjectId(child_id)})
+    if child_data:
+        return Child(**child_data)
+    raise HTTPException(status_code=404, detail="Child not found")
