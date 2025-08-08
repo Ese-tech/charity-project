@@ -59,24 +59,31 @@ export const apiService = {
     }
   },
 
-  sponsorship: {
+     sponsorship: {
     getAvailableChildren: async (limit: number = 12, region: string | null = null) => {
       // The backend now correctly handles this endpoint
       const params = new URLSearchParams({ limit: limit.toString() });
       if (region) params.append('region', region);
 
       const response = await apiClient.get<Child[]>(`/children/available?${params}`);
+      
+      // The function must return the data from the response
+      return response.data;
+    },
+    
+    getFeaturedChild: async () => {
+      const response = await apiClient.get<Child>('/children/featured');
       return response.data;
     },
 
     create: async (sponsorshipData: SponsorshipData) => {
     // Corrected payload to match the new flat backend model
     const payload = {
-      amount: sponsorshipData.monthlyAmount, // <-- Corrected property name
-      firstName: sponsorshipData.firstName, // <-- Use the new flat structure
+      monthlyAmount: sponsorshipData.monthlyAmount, // <-- Corrected property name
+      firstName: sponsorshipData.firstName,
       lastName: sponsorshipData.lastName,
       email: sponsorshipData.email,
-      child_id: sponsorshipData.childId, // <-- Corrected property name
+      childId: sponsorshipData.childId, // <-- Corrected property name
     };
 
     // Now send the corrected payload

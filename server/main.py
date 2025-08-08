@@ -5,7 +5,8 @@ from pydantic import BaseModel, Field
 from bson import ObjectId
 from typing import List, Optional
 from fastapi.middleware.cors import CORSMiddleware
-from schemas import Child, Donation, SponsorshipData, PyObjectId
+# Corrected import statement to include 'Story'
+from schemas import Child, Donation, SponsorshipData, PyObjectId, Story
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -81,6 +82,28 @@ def create_donation(donation: Donation):
 
 @app.post("/sponsorships", status_code=status.HTTP_201_CREATED)
 def create_sponsorship(sponsorship_data: SponsorshipData):
-    print(f"Received sponsorship: {sponsorship_data.model_dump()}")
+    print(f"Received sponsorship for child: {sponsorship_data.child_id}")
+    # The .model_dump(by_alias=True) ensures the data is saved with the original keys
+    # from the frontend, which might be helpful if you want to inspect them.
     sponsorships_collection.insert_one(sponsorship_data.model_dump(by_alias=True))
     return {"message": "Sponsorship created successfully", "data": sponsorship_data}
+
+@app.get("/children/featured", response_model=Child)
+def get_featured_child():
+    """
+    Retrieve a single featured child for the homepage.
+    """
+    child_data = children_collection.find_one({"is_sponsored": False})
+    if child_data:
+        return Child(**child_data)
+    raise HTTPException(status_code=404, detail="No featured child found")
+
+@app.get("/stories", response_model=List[Story])
+def get_stories():
+    """
+    Retrieve a list of all stories.
+    """
+    stories = []
+    for story_data in stories_collection.find():
+        stories.append(Story(**story_data))
+    return stories

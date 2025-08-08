@@ -1,3 +1,5 @@
+//client/src/components/Header.tsx
+
 import React, { useState } from 'react';
 import { Search, Menu, X, User } from 'lucide-react';
 import { mockData } from './mock';

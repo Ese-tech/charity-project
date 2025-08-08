@@ -1,14 +1,32 @@
-import React, { useState } from 'react';
+// client/src/components/ImpactSections.tsx
+
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight } from 'lucide-react';
 import { mockData } from './mock';
 import DonationModal from './DonationModal';
+import { apiService } from '../services/api';
+import type { Child } from '../types/apiTypes';
 
 const ImpactSections = () => {
-      const [donationModal, setDonationModal] = useState<{ isOpen: boolean; type: 'general' | 'disaster' | 'sponsor' }>({
-  isOpen: false,
-  type: 'general',
-});
+  const [featuredChild, setFeaturedChild] = useState<Child | null>(null);
+  
+  useEffect(() => {
+    const fetchFeaturedChild = async () => {
+      try {
+        const data = await apiService.sponsorship.getFeaturedChild();
+        setFeaturedChild(data);
+      } catch (e) {
+        console.error("Failed to fetch featured child for ImpactSections:", e);
+      }
+    };
+    fetchFeaturedChild();
+  }, []);
+
+  const [donationModal, setDonationModal] = useState<{ isOpen: boolean; type: 'general' | 'disaster' | 'sponsor' }>({
+    isOpen: false,
+    type: 'general',
+  });
 
   const handleSponsorChild = () => {
     console.log('Sponsor a child clicked');
@@ -39,7 +57,8 @@ const ImpactSections = () => {
           <div className="bg-white rounded-lg shadow-lg overflow-hidden group hover:shadow-xl transition-shadow duration-300">
             <div className="aspect-w-16 aspect-h-10">
               <img 
-                src={mockData.childSponsorship.image}
+                // Use the fetched photoUrl if available, otherwise fall back to mock data
+                src={featuredChild?.photoUrl || mockData.childSponsorship.image}
                 alt="Children supported through sponsorship"
                 className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
               />

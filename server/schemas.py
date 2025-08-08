@@ -68,9 +68,31 @@ class Donation(BaseModel):
     childId: Optional[str] = None
 
 # Corrected SponsorshipData model to match your frontend payload
+# Corrected SponsorshipData model
 class SponsorshipData(BaseModel):
-    firstName: str
-    lastName: str
+    first_name: str = Field(alias="firstName")
+    last_name: str = Field(alias="lastName")
     email: str
-    childId: str
-    monthlyAmount: float
+    child_id: str = Field(alias="childId")
+    monthly_amount: float = Field(alias="monthlyAmount")
+
+    class Config:
+        populate_by_name = True
+
+class Story(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    title: str
+    content: str
+    imageUrl: str
+    
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_schema_extra = {
+            "example": {
+                "id": "60c72b2f9b1d8e001f8e4e9b",
+                "title": "A Community Transformed",
+                "content": "Thanks to our sponsors, we built a new well, providing clean water to the entire village.",
+                "imageUrl": "https://images.unsplash.com/photo-1542315099045-93937d70c67a"
+            }
+        }
