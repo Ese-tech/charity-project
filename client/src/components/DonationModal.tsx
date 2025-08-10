@@ -1,4 +1,4 @@
-//client/src/components/DonationModal.tsx
+// client/src/components/DonationModal.tsx
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { X, Heart, Shield, Users } from 'lucide-react';
@@ -23,7 +23,7 @@ const DonationModal: React.FC<DonationModalProps> = ({ isOpen, onClose, type = '
     lastName: '',
     email: '',
     phone: '',
-    paymentMethod: 'credit_card',
+    paymentMethod: 'credit_card', // <-- Make sure paymentMethod is here
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -42,9 +42,6 @@ const DonationModal: React.FC<DonationModalProps> = ({ isOpen, onClose, type = '
     }
   };
 
-  // client/src/components/DonationModal.tsx
-// ... (rest of the file)
-
 const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -60,10 +57,13 @@ const handleSubmit = async (e: React.FormEvent) => {
     try {
       if (type === 'sponsor') {
         const sponsorshipData = {
-          // Corrected payload to be a flat object
-          ...formData, // <-- Spreads firstName, lastName, email, and phone
+          // CORRECTED: Explicitly define the payload for sponsorship
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
           monthlyAmount: amount,
           childId: childId,
+          paymentMethod: formData.paymentMethod, // <-- ADDED THIS LINE
         };
         await apiService.sponsorship.create(sponsorshipData);
         alert('Thank you for sponsoring a child!');
@@ -87,7 +87,6 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
   }
 
-// ... (rest of the file)
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };

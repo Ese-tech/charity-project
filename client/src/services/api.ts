@@ -9,15 +9,7 @@ import type {
   ImpactStats,
 } from '../types/apiTypes';
 
-// To fix the "Cannot find name 'process'" error in TypeScript
-// The `npm install` command above is the primary fix. This line is a fallback.
-// declare var process: {
-//   env: {
-//     REACT_APP_BACKEND_URL: string;
-//   };
-// };
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 const API_BASE = `${BACKEND_URL}`;
 
 const apiClient = axios.create({
@@ -30,20 +22,18 @@ const apiClient = axios.create({
 export const apiService = {
   donations: {
     create: async (donationData: DonationData) => {
-    // Construct the payload to match the backend's expected structure
     const payload = {
       amount: donationData.amount,
       type: donationData.type,
       category: donationData.category,
-      firstName: donationData.firstName, // <-- Use separate fields
-      lastName: donationData.lastName,   // <-- Use separate fields
+      firstName: donationData.firstName,
+      lastName: donationData.lastName,
       email: donationData.email,
       phone: donationData.phone,
       paymentMethod: donationData.paymentMethod,
       currency: donationData.currency,
     };
     
-    // Now send the corrected payload
     const response = await apiClient.post('/donations', payload);
     return response.data;
   },
@@ -61,13 +51,11 @@ export const apiService = {
 
      sponsorship: {
     getAvailableChildren: async (limit: number = 12, region: string | null = null) => {
-      // The backend now correctly handles this endpoint
       const params = new URLSearchParams({ limit: limit.toString() });
       if (region) params.append('region', region);
 
       const response = await apiClient.get<Child[]>(`/children/available?${params}`);
       
-      // The function must return the data from the response
       return response.data;
     },
     
@@ -76,18 +64,19 @@ export const apiService = {
       return response.data;
     },
 
+    // CORRECTED: Pass the full sponsorshipData object
     create: async (sponsorshipData: SponsorshipData) => {
-    // Corrected payload to match the new flat backend model
+    // This payload is being sent to the backend
     const payload = {
-      monthlyAmount: sponsorshipData.monthlyAmount, // <-- Corrected property name
+      monthlyAmount: sponsorshipData.monthlyAmount,
       firstName: sponsorshipData.firstName,
       lastName: sponsorshipData.lastName,
       email: sponsorshipData.email,
-      childId: sponsorshipData.childId, // <-- Corrected property name
+      childId: sponsorshipData.childId,
+      paymentMethod: sponsorshipData.paymentMethod, // <-- ADDED THIS LINE
     };
 
-    // Now send the corrected payload
-    const response = await apiClient.post('/sponsorships', payload); // <-- This route now exists
+    const response = await apiClient.post('/sponsorships', payload);
     return response.data;
   },
     
@@ -113,16 +102,10 @@ export const apiService = {
       return response.data;
     }
   },
-
-  content: {
-    getStories: async (limit: number = 6, category: string | null = null, featured: boolean = false) => {
-      const params = new URLSearchParams({ 
-        limit: limit.toString(),
-        featured: featured.toString()
-      });
-      if (category) params.append('category', category);
-      
-      const response = await apiClient.get<Story[]>(`/news-stories?${params}`);
+    
+  stories: { // <-- Renamed to 'stories'
+    getStories: async () => { // <-- Removed extra parameters
+      const response = await apiClient.get<Story[]>('/stories'); // <-- Corrected endpoint to '/stories'
       return response.data;
     },
     

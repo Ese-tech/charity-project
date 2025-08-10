@@ -15,7 +15,7 @@ export interface DonationData {
   email: string;
   phone?: string;
   amount: number;
-  currency?: string; // Optional, default to 'USD'
+  currency?: string; 
   type: 'monthly' | 'one-time';
   category: 'general' | 'disaster' | 'sponsor';
   paymentMethod: string;
@@ -39,12 +39,13 @@ export interface SponsorshipData {
   firstName: string;
   lastName: string;
   email: string;
-  monthlyAmount: number; // Corrected to match the backend payload
+  monthlyAmount: number; 
   childId?: string;
+  paymentMethod?: string; 
 }
 
 export interface Child {
-  _id: string; // <-- Corrected property name to '_id'
+  _id: string; 
   name: string;
   age: number;
   country: string;

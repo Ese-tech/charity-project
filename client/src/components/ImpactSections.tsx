@@ -1,29 +1,33 @@
-// client/src/components/ImpactSections.tsx
-
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight } from 'lucide-react';
 import { mockData } from './mock';
 import DonationModal from './DonationModal';
 import { apiService } from '../services/api';
-import type { Child } from '../types/apiTypes';
+import type { Child, Story } from '../types/apiTypes'; // Import Story type
 
 const ImpactSections = () => {
   const [featuredChild, setFeaturedChild] = useState<Child | null>(null);
+  const [stories, setStories] = useState<Story[]>([]); // New state for stories
   const [loading, setLoading] = useState<boolean>(true); // Add a loading state
   
   useEffect(() => {
-    const fetchFeaturedChild = async () => {
+    const fetchData = async () => {
       try {
-        const data = await apiService.sponsorship.getFeaturedChild();
-        setFeaturedChild(data);
+        // Fetch featured child and stories in parallel
+        const [childData, storiesData] = await Promise.all([
+            apiService.sponsorship.getFeaturedChild(),
+            apiService.stories.getStories() // New API call for stories
+        ]);
+        setFeaturedChild(childData);
+        setStories(storiesData);
       } catch (e) {
-        console.error("Failed to fetch featured child for ImpactSections:", e);
+        console.error("Failed to fetch data for ImpactSections:", e);
       } finally {
-        setLoading(false); // Set loading to false after the API call finishes
+        setLoading(false); // Set loading to false after both API calls finish
       }
     };
-    fetchFeaturedChild();
+    fetchData();
   }, []);
 
   const [donationModal, setDonationModal] = useState<{
@@ -49,7 +53,6 @@ const ImpactSections = () => {
     setDonationModal({ isOpen: true, type: 'disaster' });
   };
   
-  // Add a loading state check to prevent rendering until data is fetched
   if (loading) {
     return (
       <section className="py-16 bg-gray-50 text-center">
@@ -158,6 +161,23 @@ const ImpactSections = () => {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Stories Section (NEW) */}
+        {/* Stories Section (NEW) */}
+        <div className="mt-16">
+            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 text-center">Success Stories</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {stories.map((story) => (
+                    <div key={story._id} className="bg-white rounded-lg shadow-lg overflow-hidden">
+                        <img src={story.imageUrl} alt={story.title} className="w-full h-48 object-cover" />
+                        <div className="p-6">
+                            <h4 className="text-xl font-bold text-gray-900 mb-2">{story.title}</h4>
+                            <p className="text-gray-600">{story.content}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
 
         {/* Call to Action Section */}
