@@ -23,19 +23,29 @@ const ImpactSections = () => {
     fetchFeaturedChild();
   }, []);
 
-  const [donationModal, setDonationModal] = useState<{ isOpen: boolean; type: 'general' | 'disaster' | 'sponsor' }>({
+  // Correct the type definition here to include 'childId'
+  const [donationModal, setDonationModal] = useState<{
+    isOpen: boolean;
+    type: 'general' | 'disaster' | 'sponsor';
+    childId?: string; // Add this line
+  }>({
     isOpen: false,
     type: 'general',
   });
 
   const handleSponsorChild = () => {
     console.log('Sponsor a child clicked');
-        setDonationModal({ isOpen: true, type: 'sponsor' });
+    // Ensure featuredChild and its _id are not null before opening the modal
+    if (featuredChild && featuredChild._id) {
+        setDonationModal({ isOpen: true, type: 'sponsor', childId: featuredChild._id });
+    } else {
+        console.error("No featured child available to sponsor.");
+    }
   };
 
   const handleDisasterDonate = () => {
     console.log('Disaster relief donate clicked');
-       setDonationModal({ isOpen: true, type: 'disaster' });
+    setDonationModal({ isOpen: true, type: 'disaster' });
   };
 
   return (
@@ -57,7 +67,6 @@ const ImpactSections = () => {
           <div className="bg-white rounded-lg shadow-lg overflow-hidden group hover:shadow-xl transition-shadow duration-300">
             <div className="aspect-w-16 aspect-h-10">
               <img 
-                // Use the fetched photoUrl if available, otherwise fall back to mock data
                 src={featuredChild?.photoUrl || mockData.childSponsorship.image}
                 alt="Children supported through sponsorship"
                 className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
@@ -143,7 +152,7 @@ const ImpactSections = () => {
 
         {/* Call to Action Section */}
         <div className="mt-16 text-center bg-white rounded-lg shadow-lg p-8 md:p-12">
-          <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+          <h3 className="text-2xl md::text-3xl font-bold text-gray-900 mb-4">
             Ready to make a difference?
           </h3>
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
@@ -176,3 +185,9 @@ const ImpactSections = () => {
 };
 
 export default ImpactSections;
+
+
+
+
+
+

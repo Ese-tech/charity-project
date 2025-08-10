@@ -95,7 +95,7 @@ def get_featured_child():
     """
     child_data = children_collection.find_one({"is_sponsored": False})
     if child_data:
-        return Child(**child_data)
+        return child_data # <-- Change this line
     raise HTTPException(status_code=404, detail="No featured child found")
 
 @app.get("/stories", response_model=List[Story])
