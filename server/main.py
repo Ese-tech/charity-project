@@ -96,7 +96,7 @@ def create_donation(donation: Donation):
 
 @app.post("/sponsorships", status_code=status.HTTP_201_CREATED)
 def create_sponsorship(sponsorship_data: SponsorshipData):
-    print(f"Received sponsorship for child: {sponsorship_data.child_id}")
+    print(f"Received sponsorship data: {sponsorship_data.model_dump_json(indent=2)}")
     # The .model_dump(by_alias=True) ensures the data is saved with the original keys
     # from the frontend, which might be helpful if you want to inspect them.
     sponsorships_collection.insert_one(sponsorship_data.model_dump(by_alias=True))

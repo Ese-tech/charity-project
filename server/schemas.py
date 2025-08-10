@@ -1,9 +1,9 @@
 # server/schemas.py
-from pydantic import BaseModel, Field
-from typing import Optional, List
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, List, Literal
 from bson import ObjectId
 from pydantic_core import PydanticCustomError, core_schema
-from typing import Literal
+from enum import Enum
 
 # Helper class to handle MongoDB's ObjectId
 class PyObjectId(ObjectId):
@@ -30,7 +30,6 @@ class PyObjectId(ObjectId):
             raise PydanticCustomError('invalid_objectid', 'Invalid ObjectId')
         return ObjectId(v)
 
-
 # Corrected Child model with alias for '_id' and updated field names
 class Child(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
@@ -44,7 +43,7 @@ class Child(BaseModel):
     class Config:
         populate_by_name = True
         arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str} # <-- ADD THIS LINE
+        json_encoders = {ObjectId: str}
         json_schema_extra = {
             "example": {
                 "id": "60c72b2f9b1d8e001f8e4e9a",
@@ -55,31 +54,45 @@ class Child(BaseModel):
                 "story": "Maria loves playing soccer and dreams of becoming a teacher."
             }
         }
+# New: Define a Python Enum for payment methods
+class PaymentMethod(str, Enum):
+    credit_card = "credit_card"
+    debit_card = "debit_card"
+    paypal = "paypal"
+    mobile_money = "mobile_money"
 
-# Updated Donation class to match frontend payload
+# Updated Donation class to match frontend payload and new features
 class Donation(BaseModel):
     firstName: str
     lastName: str
     email: str
     phone: Optional[str] = None
-    amount: float
-    currency: str
+    # Conditional fields based on category
+    amount: Optional[float] = None
+    currency: Optional[str] = None
+    item_type: Optional[str] = None
+    description: Optional[str] = None
     type: Literal['monthly', 'one-time']
-    category: Literal['general', 'disaster', 'sponsor']
-    paymentMethod: str
+    category: Literal['general', 'disaster', 'sponsor', 'items'] # <-- ADDED 'items'
+    paymentMethod: Optional[PaymentMethod] = None # Use the new enum here
     childId: Optional[str] = None
 
-# Corrected SponsorshipData model to match your frontend payload
-# Corrected SponsorshipData model
+# Corrected SponsorshipData model to make childId optional
 class SponsorshipData(BaseModel):
     first_name: str = Field(alias="firstName")
     last_name: str = Field(alias="lastName")
     email: str
-    child_id: str = Field(alias="childId")
+    # Making child_id optional by providing a default value of None
+    child_id: Optional[str] = Field(None, alias="childId")
     monthly_amount: float = Field(alias="monthlyAmount")
+    payment_method: PaymentMethod = Field(alias="paymentMethod") # Using the new enum
+    currency: str = Field(alias="currency")
+
 
     class Config:
         populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
 
 class Story(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
@@ -90,7 +103,7 @@ class Story(BaseModel):
     class Config:
         populate_by_name = True
         arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str} # <-- ADD THIS LINE
+        json_encoders = {ObjectId: str}
         json_schema_extra = {
             "example": {
                 "id": "60c72b2f9b1d8e001f8e4e9b",

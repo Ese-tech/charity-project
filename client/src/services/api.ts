@@ -7,6 +7,7 @@ import type {
   Child, 
   Story, 
   ImpactStats,
+  PaymentMethod, // ADDED this import
 } from '../types/apiTypes';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
@@ -22,16 +23,25 @@ const apiClient = axios.create({
 export const apiService = {
   donations: {
     create: async (donationData: DonationData) => {
+    // UPDATED payload to be dynamic based on the category
     const payload = {
-      amount: donationData.amount,
-      type: donationData.type,
-      category: donationData.category,
       firstName: donationData.firstName,
       lastName: donationData.lastName,
       email: donationData.email,
       phone: donationData.phone,
-      paymentMethod: donationData.paymentMethod,
-      currency: donationData.currency,
+      type: donationData.type,
+      category: donationData.category,
+      childId: donationData.childId,
+      // Conditionally add monetary or item fields
+      ...(donationData.category !== 'items' && {
+        amount: donationData.amount,
+        currency: donationData.currency,
+        paymentMethod: donationData.paymentMethod,
+      }),
+      ...(donationData.category === 'items' && {
+        item_type: donationData.item_type,
+        description: donationData.description,
+      }),
     };
     
     const response = await apiClient.post('/donations', payload);
@@ -64,16 +74,15 @@ export const apiService = {
       return response.data;
     },
 
-    // CORRECTED: Pass the full sponsorshipData object
     create: async (sponsorshipData: SponsorshipData) => {
-    // This payload is being sent to the backend
     const payload = {
       monthlyAmount: sponsorshipData.monthlyAmount,
       firstName: sponsorshipData.firstName,
       lastName: sponsorshipData.lastName,
       email: sponsorshipData.email,
       childId: sponsorshipData.childId,
-      paymentMethod: sponsorshipData.paymentMethod, // <-- ADDED THIS LINE
+      paymentMethod: sponsorshipData.paymentMethod,
+      currency: sponsorshipData.currency,
     };
 
     const response = await apiClient.post('/sponsorships', payload);
@@ -103,9 +112,9 @@ export const apiService = {
     }
   },
     
-  stories: { // <-- Renamed to 'stories'
-    getStories: async () => { // <-- Removed extra parameters
-      const response = await apiClient.get<Story[]>('/stories'); // <-- Corrected endpoint to '/stories'
+  stories: { 
+    getStories: async () => { 
+      const response = await apiClient.get<Story[]>('/stories');
       return response.data;
     },
     

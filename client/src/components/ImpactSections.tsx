@@ -1,3 +1,4 @@
+// client/src/components/ImpactSections.tsx
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -5,12 +6,14 @@ import { mockData } from './mock';
 import DonationModal from './DonationModal';
 import { apiService } from '../services/api';
 import type { Child, Story } from '../types/apiTypes'; // Import Story type
+import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
 
 const ImpactSections = () => {
   const [featuredChild, setFeaturedChild] = useState<Child | null>(null);
   const [stories, setStories] = useState<Story[]>([]); // New state for stories
   const [loading, setLoading] = useState<boolean>(true); // Add a loading state
-  
+  const navigate = useNavigate(); // Initialize the navigate function
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -39,14 +42,8 @@ const ImpactSections = () => {
     type: 'general',
   });
 
-  const handleSponsorChild = () => {
-    console.log('Sponsor a child clicked');
-    if (featuredChild && featuredChild._id) {
-        setDonationModal({ isOpen: true, type: 'sponsor', childId: featuredChild._id });
-    } else {
-        console.error("No featured child available to sponsor.");
-    }
-  };
+  // REMOVED handleSponsorChild function to prevent opening the modal.
+  // We will now directly navigate.
 
   const handleDisasterDonate = () => {
     console.log('Disaster relief donate clicked');
@@ -110,7 +107,7 @@ const ImpactSections = () => {
               </div>
 
               <button 
-                onClick={handleSponsorChild}
+                onClick={() => navigate('/children')} // Navigate to the children's page
                 className="text-teal-500 hover:text-teal-600 font-semibold flex items-center space-x-1 transition-colors group"
               >
                 <span>{mockData.childSponsorship.ctaText}</span>
@@ -190,7 +187,7 @@ const ImpactSections = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              onClick={handleSponsorChild}
+              onClick={() => navigate('/children')} // Navigate to the children's page
               className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105"
             >
               Sponsor a Child
