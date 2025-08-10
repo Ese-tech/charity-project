@@ -1,6 +1,5 @@
-// client/src/components/Home.tsx
+// client/src/pages/Home.tsx
 
-import React from 'react';
 import Hero from '../components/Hero';
 import ImpactSections from '../components/ImpactSections';
 

@@ -1,3 +1,4 @@
+// client/src/services/api.ts
 import axios from 'axios';
 import type { 
   DonationData, 
@@ -6,17 +7,10 @@ import type {
   Child, 
   Story, 
   ImpactStats,
-} from '../types/apiTypes'; // Assuming you have a types file for better organization
+  PaymentMethod, // ADDED this import
+} from '../types/apiTypes';
 
-// To fix the "Cannot find name 'process'" error in TypeScript
-// The `npm install` command above is the primary fix. This line is a fallback.
-// declare var process: {
-//   env: {
-//     REACT_APP_BACKEND_URL: string;
-//   };
-// };
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 const API_BASE = `${BACKEND_URL}`;
 
 const apiClient = axios.create({
@@ -29,18 +23,27 @@ const apiClient = axios.create({
 export const apiService = {
   donations: {
     create: async (donationData: DonationData) => {
-    // Construct the payload to match the backend's expected structure
+    // UPDATED payload to be dynamic based on the category
     const payload = {
-      amount: donationData.amount,
-      type: donationData.type,
-      category: donationData.category,
-      name: `${donationData.firstName} ${donationData.lastName}`,
+      firstName: donationData.firstName,
+      lastName: donationData.lastName,
       email: donationData.email,
       phone: donationData.phone,
-      paymentMethod: donationData.paymentMethod,
+      type: donationData.type,
+      category: donationData.category,
+      childId: donationData.childId,
+      // Conditionally add monetary or item fields
+      ...(donationData.category !== 'items' && {
+        amount: donationData.amount,
+        currency: donationData.currency,
+        paymentMethod: donationData.paymentMethod,
+      }),
+      ...(donationData.category === 'items' && {
+        item_type: donationData.item_type,
+        description: donationData.description,
+      }),
     };
     
-    // Now send the corrected payload
     const response = await apiClient.post('/donations', payload);
     return response.data;
   },
@@ -56,25 +59,32 @@ export const apiService = {
     }
   },
 
-  sponsorship: {
+     sponsorship: {
     getAvailableChildren: async (limit: number = 12, region: string | null = null) => {
       const params = new URLSearchParams({ limit: limit.toString() });
       if (region) params.append('region', region);
-      
+
       const response = await apiClient.get<Child[]>(`/children/available?${params}`);
+      
       return response.data;
     },
     
+    getFeaturedChild: async () => {
+      const response = await apiClient.get<Child>('/children/featured');
+      return response.data;
+    },
+
     create: async (sponsorshipData: SponsorshipData) => {
-    // Construct the payload to match the backend's expected structure
     const payload = {
-      amount: sponsorshipData.monthlyAmount,
-      name: `${sponsorshipData.sponsorInfo.firstName} ${sponsorshipData.sponsorInfo.lastName}`,
-      email: sponsorshipData.sponsorInfo.email,
-      child_id: sponsorshipData.childId, // Assuming childId is part of SponsorshipData
+      monthlyAmount: sponsorshipData.monthlyAmount,
+      firstName: sponsorshipData.firstName,
+      lastName: sponsorshipData.lastName,
+      email: sponsorshipData.email,
+      childId: sponsorshipData.childId,
+      paymentMethod: sponsorshipData.paymentMethod,
+      currency: sponsorshipData.currency,
     };
-    
-    // Now send the corrected payload
+
     const response = await apiClient.post('/sponsorships', payload);
     return response.data;
   },
@@ -101,16 +111,10 @@ export const apiService = {
       return response.data;
     }
   },
-
-  content: {
-    getStories: async (limit: number = 6, category: string | null = null, featured: boolean = false) => {
-      const params = new URLSearchParams({ 
-        limit: limit.toString(),
-        featured: featured.toString()
-      });
-      if (category) params.append('category', category);
-      
-      const response = await apiClient.get<Story[]>(`/news-stories?${params}`);
+    
+  stories: { 
+    getStories: async () => { 
+      const response = await apiClient.get<Story[]>('/stories');
       return response.data;
     },
     

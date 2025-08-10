@@ -22,7 +22,7 @@ const AppRoutes = () => {
         <Route path="/" element={<Home />} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-        <Route path="/sponsor" element={<SponsorPage />} />
+        <Route path="/children" element={<SponsorPage />} />
       </Route>
     </Routes>
   );

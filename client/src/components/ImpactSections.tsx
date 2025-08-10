@@ -1,24 +1,62 @@
-import React, { useState } from 'react';
+// client/src/components/ImpactSections.tsx
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight } from 'lucide-react';
 import { mockData } from './mock';
 import DonationModal from './DonationModal';
+import { apiService } from '../services/api';
+import type { Child, Story } from '../types/apiTypes'; // Import Story type
+import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
 
 const ImpactSections = () => {
-      const [donationModal, setDonationModal] = useState<{ isOpen: boolean; type: 'general' | 'disaster' | 'sponsor' }>({
-  isOpen: false,
-  type: 'general',
-});
+  const [featuredChild, setFeaturedChild] = useState<Child | null>(null);
+  const [stories, setStories] = useState<Story[]>([]); // New state for stories
+  const [loading, setLoading] = useState<boolean>(true); // Add a loading state
+  const navigate = useNavigate(); // Initialize the navigate function
 
-  const handleSponsorChild = () => {
-    console.log('Sponsor a child clicked');
-        setDonationModal({ isOpen: true, type: 'sponsor' });
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch featured child and stories in parallel
+        const [childData, storiesData] = await Promise.all([
+            apiService.sponsorship.getFeaturedChild(),
+            apiService.stories.getStories() // New API call for stories
+        ]);
+        setFeaturedChild(childData);
+        setStories(storiesData);
+      } catch (e) {
+        console.error("Failed to fetch data for ImpactSections:", e);
+      } finally {
+        setLoading(false); // Set loading to false after both API calls finish
+      }
+    };
+    fetchData();
+  }, []);
+
+  const [donationModal, setDonationModal] = useState<{
+    isOpen: boolean;
+    type: 'general' | 'disaster' | 'sponsor';
+    childId?: string;
+  }>({
+    isOpen: false,
+    type: 'general',
+  });
+
+  // REMOVED handleSponsorChild function to prevent opening the modal.
+  // We will now directly navigate.
 
   const handleDisasterDonate = () => {
     console.log('Disaster relief donate clicked');
-       setDonationModal({ isOpen: true, type: 'disaster' });
+    setDonationModal({ isOpen: true, type: 'disaster' });
   };
+  
+  if (loading) {
+    return (
+      <section className="py-16 bg-gray-50 text-center">
+        <p className="text-xl">Loading impact sections...</p>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 bg-gray-50">
@@ -39,7 +77,7 @@ const ImpactSections = () => {
           <div className="bg-white rounded-lg shadow-lg overflow-hidden group hover:shadow-xl transition-shadow duration-300">
             <div className="aspect-w-16 aspect-h-10">
               <img 
-                src={mockData.childSponsorship.image}
+                src={featuredChild?.photoUrl || mockData.childSponsorship.image}
                 alt="Children supported through sponsorship"
                 className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
               />
@@ -69,7 +107,7 @@ const ImpactSections = () => {
               </div>
 
               <button 
-                onClick={handleSponsorChild}
+                onClick={() => navigate('/children')} // Navigate to the children's page
                 className="text-teal-500 hover:text-teal-600 font-semibold flex items-center space-x-1 transition-colors group"
               >
                 <span>{mockData.childSponsorship.ctaText}</span>
@@ -122,6 +160,23 @@ const ImpactSections = () => {
           </div>
         </div>
 
+        {/* Stories Section (NEW) */}
+        {/* Stories Section (NEW) */}
+        <div className="mt-16">
+            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 text-center">Success Stories</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {stories.map((story) => (
+                    <div key={story._id} className="bg-white rounded-lg shadow-lg overflow-hidden">
+                        <img src={story.imageUrl} alt={story.title} className="w-full h-48 object-cover" />
+                        <div className="p-6">
+                            <h4 className="text-xl font-bold text-gray-900 mb-2">{story.title}</h4>
+                            <p className="text-gray-600">{story.content}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+
         {/* Call to Action Section */}
         <div className="mt-16 text-center bg-white rounded-lg shadow-lg p-8 md:p-12">
           <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
@@ -132,7 +187,7 @@ const ImpactSections = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              onClick={handleSponsorChild}
+              onClick={() => navigate('/children')} // Navigate to the children's page
               className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105"
             >
               Sponsor a Child

@@ -1,4 +1,6 @@
-// User interface for authentication
+// client/src/types/apiTypes.ts
+
+
 export interface User {
   _id: string;
   name: string;
@@ -6,16 +8,30 @@ export interface User {
   token: string;
 }
 
+export const PaymentMethod = {
+    CreditCard: "credit_card",
+    DebitCard: "debit_card",
+    PayPal: "paypal",
+    MobileMoney: "mobile_money",
+} as const;
+
+// The type is inferred from the object
+export type PaymentMethod = typeof PaymentMethod[keyof typeof PaymentMethod];
+
 // Donation types
 export interface DonationData {
   firstName: string;
   lastName: string;
   email: string;
   phone?: string;
-  amount: number;
+  amount?: number; // Made optional
+  currency?: string; // Made optional
+  item_type?: string; // New field
+  description?: string; // New field
   type: 'monthly' | 'one-time';
-  category: 'general' | 'disaster' | 'sponsor';
-  paymentMethod: string;
+  category: 'general' | 'disaster' | 'sponsor' | 'items'; // Updated with new category
+  paymentMethod?: PaymentMethod; // Made optional
+  childId?: string;
 }
 
 export interface DonationResponse {
@@ -33,18 +49,17 @@ export interface DonationResponse {
 
 // Sponsorship types
 export interface SponsorshipData {
-  sponsorInfo: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone?: string;
-  };
-  monthlyAmount: number;
+  firstName: string;
+  lastName: string;
+  email: string;
   childId?: string;
+  monthlyAmount: number;
+  paymentMethod: PaymentMethod;
+  currency: string;
 }
 
 export interface Child {
-  _id: string;
+  _id: string; 
   name: string;
   age: number;
   country: string;

@@ -1,4 +1,4 @@
-// mock.ts
+// client/src/components/mock.ts
 export const mockData = {
   navigation: {
     logo: "World Vision",
