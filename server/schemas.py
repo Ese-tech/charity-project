@@ -39,10 +39,12 @@ class Child(BaseModel):
     age: int
     photoUrl: str
     story: str
+    isSponsored: Optional[bool] = Field(False, alias="is_sponsored") # Added isSponsored
 
     class Config:
         populate_by_name = True
         arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str} # <-- ADD THIS LINE
         json_schema_extra = {
             "example": {
                 "id": "60c72b2f9b1d8e001f8e4e9a",
@@ -88,6 +90,7 @@ class Story(BaseModel):
     class Config:
         populate_by_name = True
         arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str} # <-- ADD THIS LINE
         json_schema_extra = {
             "example": {
                 "id": "60c72b2f9b1d8e001f8e4e9b",

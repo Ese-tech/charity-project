@@ -10,6 +10,7 @@ import type { Child } from '../types/apiTypes';
 
 const ImpactSections = () => {
   const [featuredChild, setFeaturedChild] = useState<Child | null>(null);
+  const [loading, setLoading] = useState<boolean>(true); // Add a loading state
   
   useEffect(() => {
     const fetchFeaturedChild = async () => {
@@ -18,16 +19,17 @@ const ImpactSections = () => {
         setFeaturedChild(data);
       } catch (e) {
         console.error("Failed to fetch featured child for ImpactSections:", e);
+      } finally {
+        setLoading(false); // Set loading to false after the API call finishes
       }
     };
     fetchFeaturedChild();
   }, []);
 
-  // Correct the type definition here to include 'childId'
   const [donationModal, setDonationModal] = useState<{
     isOpen: boolean;
     type: 'general' | 'disaster' | 'sponsor';
-    childId?: string; // Add this line
+    childId?: string;
   }>({
     isOpen: false,
     type: 'general',
@@ -35,7 +37,6 @@ const ImpactSections = () => {
 
   const handleSponsorChild = () => {
     console.log('Sponsor a child clicked');
-    // Ensure featuredChild and its _id are not null before opening the modal
     if (featuredChild && featuredChild._id) {
         setDonationModal({ isOpen: true, type: 'sponsor', childId: featuredChild._id });
     } else {
@@ -47,6 +48,15 @@ const ImpactSections = () => {
     console.log('Disaster relief donate clicked');
     setDonationModal({ isOpen: true, type: 'disaster' });
   };
+  
+  // Add a loading state check to prevent rendering until data is fetched
+  if (loading) {
+    return (
+      <section className="py-16 bg-gray-50 text-center">
+        <p className="text-xl">Loading impact sections...</p>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 bg-gray-50">
@@ -152,7 +162,7 @@ const ImpactSections = () => {
 
         {/* Call to Action Section */}
         <div className="mt-16 text-center bg-white rounded-lg shadow-lg p-8 md:p-12">
-          <h3 className="text-2xl md::text-3xl font-bold text-gray-900 mb-4">
+          <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
             Ready to make a difference?
           </h3>
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
@@ -185,9 +195,3 @@ const ImpactSections = () => {
 };
 
 export default ImpactSections;
-
-
-
-
-
-

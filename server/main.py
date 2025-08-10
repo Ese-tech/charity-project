@@ -33,6 +33,7 @@ db = client.charity_db
 children_collection = db.children
 donations_collection = db.donations
 sponsorships_collection = db.sponsorships
+stories_collection = db.stories
 
 # API endpoints
 @app.get("/")
@@ -45,6 +46,17 @@ def get_children():
     for child_data in children_collection.find():
         children.append(Child(**child_data))
     return children
+
+# Define the more specific 'featured' route first
+@app.get("/children/featured", response_model=Child)
+def get_featured_child():
+    """
+    Retrieve a single featured child for the homepage.
+    """
+    child_data = children_collection.find_one({"is_sponsored": False})
+    if child_data:
+        return Child(**child_data) # <-- This was corrected in the previous step
+    raise HTTPException(status_code=404, detail="No featured child found")
 
 @app.get("/children/available", response_model=list[Child])
 def get_available_children(limit: int = 12, region: Optional[str] = None):
@@ -65,6 +77,8 @@ def get_available_children(limit: int = 12, region: Optional[str] = None):
         
     return children
 
+
+# Define the more general 'child_id' route after the 'featured' route
 @app.get("/children/{child_id}", response_model=Child)
 def get_child(child_id: str):
     if not ObjectId.is_valid(child_id):
@@ -87,16 +101,6 @@ def create_sponsorship(sponsorship_data: SponsorshipData):
     # from the frontend, which might be helpful if you want to inspect them.
     sponsorships_collection.insert_one(sponsorship_data.model_dump(by_alias=True))
     return {"message": "Sponsorship created successfully", "data": sponsorship_data}
-
-@app.get("/children/featured", response_model=Child)
-def get_featured_child():
-    """
-    Retrieve a single featured child for the homepage.
-    """
-    child_data = children_collection.find_one({"is_sponsored": False})
-    if child_data:
-        return child_data # <-- Change this line
-    raise HTTPException(status_code=404, detail="No featured child found")
 
 @app.get("/stories", response_model=List[Story])
 def get_stories():
