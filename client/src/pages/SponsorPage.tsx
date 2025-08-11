@@ -2,21 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
-import { Button } from '../components/ui/button';
-import DonationModal from '../components/DonationModal';
+import { Link } from 'react-router-dom'; // <-- Import Link
 import type { Child } from '../types/apiTypes';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; // Assuming you have these components
 
 const SponsorPage: React.FC = () => {
     const [children, setChildren] = useState<Child[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [donationModal, setDonationModal] = useState<{
-        isOpen: boolean;
-        childId: string | null;
-    }>({
-        isOpen: false,
-        childId: null,
-    });
 
     useEffect(() => {
         const fetchChildren = async () => {
@@ -33,14 +26,6 @@ const SponsorPage: React.FC = () => {
 
         fetchChildren();
     }, []);
-
-    const handleSponsorClick = (childId: string) => {
-        setDonationModal({ isOpen: true, childId });
-    };
-
-    const handleModalClose = () => {
-        setDonationModal({ isOpen: false, childId: null });
-    };
 
     if (loading) {
         return (
@@ -67,28 +52,26 @@ const SponsorPage: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {children.map((child) => (
-                    <div key={child._id} className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
-                        <img src={child.photoUrl} alt={child.name} className="w-full h-64 object-cover" />
-                        <div className="p-6 flex-grow flex flex-col">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">{child.name}, {child.age}</h2>
-                            <p className="text-gray-600 mb-4 flex-grow">{child.story}</p>
-                            <Button 
-                                onClick={() => handleSponsorClick(child._id)}
-                                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition-all"
-                            >
-                                Sponsor {child.name}
-                            </Button>
-                        </div>
-                    </div>
+                    <Link to={`/children/${child._id}`} key={child._id}> {/* <-- Wrap the card in a Link */}
+                        <Card className="w-full max-w-sm mx-auto transition-all duration-200 ease-in-out hover:shadow-xl hover:scale-105">
+                            {child.photoUrl && (
+                                <img src={child.photoUrl} alt={child.name} className="w-full h-64 object-cover rounded-t-lg" />
+                            )}
+                            <CardHeader>
+                                <CardTitle>{child.name}, {child.age}</CardTitle>
+                                <p className="text-sm text-gray-500">{child.country}</p>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-gray-700 mb-4 flex-grow">{child.story}</p>
+                                {/* The button is now inside the link */}
+                                <div className="w-full bg-orange-500 text-white font-bold py-3 rounded-lg text-center transition-all">
+                                    View {child.name}'s Profile
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
                 ))}
             </div>
-
-            <DonationModal
-                isOpen={donationModal.isOpen}
-                onClose={handleModalClose}
-                type="sponsor"
-                childId={donationModal.childId || undefined}
-            />
         </div>
     );
 };

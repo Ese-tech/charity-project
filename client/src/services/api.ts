@@ -1,4 +1,3 @@
-// client/src/services/api.ts
 import axios from 'axios';
 import type { 
   DonationData, 
@@ -7,7 +6,7 @@ import type {
   Child, 
   Story, 
   ImpactStats,
-  PaymentMethod, // ADDED this import
+  PaymentMethod,
 } from '../types/apiTypes';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
@@ -23,7 +22,6 @@ const apiClient = axios.create({
 export const apiService = {
   donations: {
     create: async (donationData: DonationData) => {
-    // UPDATED payload to be dynamic based on the category
     const payload = {
       firstName: donationData.firstName,
       lastName: donationData.lastName,
@@ -32,7 +30,6 @@ export const apiService = {
       type: donationData.type,
       category: donationData.category,
       childId: donationData.childId,
-      // Conditionally add monetary or item fields
       ...(donationData.category !== 'items' && {
         amount: donationData.amount,
         currency: donationData.currency,
@@ -59,7 +56,7 @@ export const apiService = {
     }
   },
 
-     sponsorship: {
+  sponsorship: {
     getAvailableChildren: async (limit: number = 12, region: string | null = null) => {
       const params = new URLSearchParams({ limit: limit.toString() });
       if (region) params.append('region', region);
@@ -71,6 +68,12 @@ export const apiService = {
     
     getFeaturedChild: async () => {
       const response = await apiClient.get<Child>('/children/featured');
+      return response.data;
+    },
+
+    // ADDED: The missing getChild method to fetch a single child by ID
+    getChild: async (child_id: string) => {
+      const response = await apiClient.get<Child>(`/children/${child_id}`);
       return response.data;
     },
 

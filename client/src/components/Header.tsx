@@ -1,10 +1,10 @@
-//client/src/components/Header.tsx
+// client/src/components/Header.tsx
 
 import React, { useState } from 'react';
 import { Search, Menu, X, User } from 'lucide-react';
 import { mockData } from './mock';
 import DonationModal from './DonationModal';
-import { useNavigate } from 'react-router-dom'; // <-- Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import { useToast } from './ToastProvider';
 
 interface MenuItem {
@@ -21,12 +21,11 @@ const Header = () => {
     type: 'general',
   });
   const navigate = useNavigate();
-  const { showToast } = useToast(); // <-- Initialize the hook
+  const { showToast } = useToast();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Searching for:', searchQuery);
-    // Replace alert() with a toast notification
     showToast(`Searching for: "${searchQuery}"`, 'info');
   };
 
@@ -35,12 +34,15 @@ const Header = () => {
     if (item.name === 'Donate') {
       setDonationModal({ isOpen: true, type: 'general' });
     } else if (item.name === 'Sponsor a Child') {
-      navigate('/sponsor');
+      navigate('/children');
     } else {
-      // Replace alert() with a toast notification
       showToast(`Navigating to the ${item.name} page...`, 'info');
     }
     setIsMenuOpen(false);
+  };
+  
+  const handleLogoClick = () => {
+    navigate('/');
   };
 
   return (
@@ -73,13 +75,14 @@ const Header = () => {
 
         {/* Main navigation */}
         <div className="flex justify-between items-center py-4">
-          {/* Logo */}
-          <div className="flex items-center">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-orange-500 transform rotate-45"></div>
-              <span className="text-2xl font-bold text-gray-900">World Vision</span>
-            </div>
-          </div>
+          {/* Logo - Made clickable */}
+          <button 
+            onClick={handleLogoClick} 
+            className="flex items-center space-x-2 focus:outline-none"
+          >
+            <div className="w-8 h-8 bg-orange-500 transform rotate-45"></div>
+            <span className="text-2xl font-bold text-gray-900">World Vision</span>
+          </button>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
