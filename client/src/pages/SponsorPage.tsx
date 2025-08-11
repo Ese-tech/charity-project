@@ -1,98 +1,96 @@
 // client/src/pages/SponsorPage.tsx
-import { useState, useEffect } from 'react';
-import DonationModal from '../components/DonationModal';
+
+import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
+import { Button } from '../components/ui/button';
+import DonationModal from '../components/DonationModal';
 import type { Child } from '../types/apiTypes';
 
-// Import the newly added components
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+const SponsorPage: React.FC = () => {
+    const [children, setChildren] = useState<Child[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const [donationModal, setDonationModal] = useState<{
+        isOpen: boolean;
+        childId: string | null;
+    }>({
+        isOpen: false,
+        childId: null,
+    });
 
-const SponsorPage = () => {
-  const [children, setChildren] = useState<Child[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [donationModal, setDonationModal] = useState<{
-    isOpen: boolean;
-    type: 'general' | 'disaster' | 'sponsor';
-    childId?: string;
-  }>({
-    isOpen: false,
-    type: 'sponsor',
-    childId: undefined,
-  });
+    useEffect(() => {
+        const fetchChildren = async () => {
+            try {
+                const availableChildren = await apiService.sponsorship.getAvailableChildren();
+                setChildren(availableChildren);
+            } catch (err) {
+                console.error("Failed to fetch children:", err);
+                setError("Failed to load children. Please try again later.");
+            } finally {
+                setLoading(false);
+            }
+        };
 
-  // Fetch children data from the FastAPI backend
-  useEffect(() => {
-    const fetchChildren = async () => {
-      try {
-        const data: Child[] = await apiService.sponsorship.getAvailableChildren();
-        setChildren(data);
-      } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
+        fetchChildren();
+    }, []);
+
+    const handleSponsorClick = (childId: string) => {
+        setDonationModal({ isOpen: true, childId });
     };
 
-    fetchChildren();
-  }, []); // The empty array ensures this effect runs only once when the component mounts
+    const handleModalClose = () => {
+        setDonationModal({ isOpen: false, childId: null });
+    };
 
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <p className="text-xl text-gray-600">Loading children...</p>
+            </div>
+        );
+    }
 
-  const handleSponsorClick = (childId: string) => {
-    setDonationModal({
-      isOpen: true,
-      type: 'sponsor',
-      childId: childId,
-    });
-  };
+    if (error) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <p className="text-xl text-red-500">{error}</p>
+            </div>
+        );
+    }
 
-  if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-xl font-semibold">Loading children...</div>
-      </div>
-    );
-  }
+        <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <h1 className="text-4xl font-bold text-center text-gray-900 mb-4">Sponsor a Child</h1>
+            <p className="text-lg text-center text-gray-600 mb-12">
+                Make a difference in a child's life by providing them with the support they need to thrive.
+            </p>
 
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-screen text-red-500">
-        Error loading data: {error}
-      </div>
-    );
-  }
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {children.map((child) => (
+                    <div key={child._id} className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
+                        <img src={child.photoUrl} alt={child.name} className="w-full h-64 object-cover" />
+                        <div className="p-6 flex-grow flex flex-col">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">{child.name}, {child.age}</h2>
+                            <p className="text-gray-600 mb-4 flex-grow">{child.story}</p>
+                            <Button 
+                                onClick={() => handleSponsorClick(child._id)}
+                                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition-all"
+                            >
+                                Sponsor {child.name}
+                            </Button>
+                        </div>
+                    </div>
+                ))}
+            </div>
 
-  return (
-    <main className="container mx-auto py-8">
-      <h1 className="text-4xl font-bold text-center mb-12">Sponsor a Child</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {children.map((child) => (
-          <Card key={child._id} className="w-full max-w-sm mx-auto">
-            {child.photoUrl && (
-              <img src={child.photoUrl} alt={child.name} className="w-full h-48 object-cover rounded-t-lg" />
-            )}
-            <CardHeader>
-              <CardTitle>{child.name}</CardTitle>
-              <p className="text-sm text-gray-500">{child.country}</p>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-700 mb-4">{child.story}</p>
-              <Button onClick={() => handleSponsorClick(child._id)} className="w-full">
-                Sponsor {child.name}
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      <DonationModal
-        isOpen={donationModal.isOpen}
-        onClose={() => setDonationModal({ ...donationModal, isOpen: false })}
-        type={donationModal.type}
-        childId={donationModal.childId}
-      />
-    </main>
-  );
+            <DonationModal
+                isOpen={donationModal.isOpen}
+                onClose={handleModalClose}
+                type="sponsor"
+                childId={donationModal.childId || undefined}
+            />
+        </div>
+    );
 };
 
 export default SponsorPage;
