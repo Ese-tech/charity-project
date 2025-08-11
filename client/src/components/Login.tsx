@@ -1,15 +1,17 @@
+// client/src/components/Login.tsx
+
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import { useAuth } from '../AuthContext'; // Import useAuth
+import { useNavigate, Link } from 'react-router-dom'; // Import Link here
+import { useAuth } from '../AuthContext';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate(); // Initialize useNavigate
-  const { login } = useAuth(); // Get the login function from AuthContext
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,8 +22,8 @@ const Login: React.FC = () => {
       });
       setMessage('Logged in successfully!');
       console.log('Login successful:', response.data);
-      login(response.data); // Log in the user via AuthContext
-      navigate('/dashboard'); // Redirect to dashboard after successful login
+      login(response.data);
+      navigate('/dashboard');
     } catch (error: any) {
       setMessage(error.response?.data?.message || 'Something went wrong');
       console.error(error);
@@ -45,7 +47,7 @@ const Login: React.FC = () => {
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-        <div className="mb-6 relative">
+        <div className="mb-2 relative"> {/* Reduced margin-bottom */}
           <label className="block mb-2 text-sm font-bold text-gray-700">Password</label>
           <input
             type={showPassword ? 'text' : 'password'}
@@ -71,6 +73,11 @@ const Login: React.FC = () => {
             )}
           </button>
         </div>
+        <div className="mb-6 text-sm text-right">
+          <Link to="/forgot-password" className="font-medium text-indigo-500 hover:text-indigo-700">
+            Forgot Password?
+          </Link>
+        </div>
         <button
           type="submit"
           className="w-full px-4 py-2 font-bold text-white bg-green-500 rounded hover:bg-green-700 focus:outline-none focus:shadow-outline"
@@ -78,7 +85,7 @@ const Login: React.FC = () => {
           Login
         </button>
         <p className="mt-4 text-center text-gray-600">
-          Don't have an account? <a href="/register" className="text-green-500 hover:underline">Register here</a>
+          Don't have an account? <Link to="/register" className="text-green-500 hover:underline">Register here</Link>
         </p>
       </form>
       {message && <p className="mt-4 text-center text-gray-700">{message}</p>}
