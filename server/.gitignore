@@ -35,6 +35,24 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Python cache files (FastAPI backend)
 __pycache__/
-*.py[cod]
+*.py[cod]**
 *.pyo
+*.pyd
 venv/
+.venv/
+env/
+.env/
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Pytest
+.pytest_cache/
+.coverage
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
