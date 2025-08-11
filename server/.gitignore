@@ -35,7 +35,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 venv/
 
 # Python files (not used in this TypeScript project)
-__pycache__/
-*.py[cod]
-venv/
-*.py
+# __pycache__/
+# *.py[cod]
+# venv/
+# *.py
