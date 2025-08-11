@@ -87,6 +87,18 @@ def get_child(child_id: str):
     if child_data:
         return Child(**child_data)
     raise HTTPException(status_code=404, detail="Child not found")
+    
+# ADDED: New endpoint to get a user's donation history by email
+@app.get("/donations/history", response_model=List[Donation])
+def get_donation_history(email: str = Query(..., description="Email of the user to fetch donation history for")):
+    """
+    Retrieve a list of all donations for a specific user.
+    """
+    donations = []
+    # Find donations in the database that match the provided email
+    for donation_data in donations_collection.find({"email": email}):
+        donations.append(Donation(**donation_data))
+    return donations
 
 @app.post("/donations", status_code=status.HTTP_201_CREATED)
 def create_donation(donation: Donation):

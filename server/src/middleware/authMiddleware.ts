@@ -1,3 +1,5 @@
+// client/src/middleware/authMiddleware.ts
+
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { User, IUser } from '../models/User';
@@ -14,8 +16,6 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
     try {
       token = req.headers.authorization.split(' ')[1];
       
-      // We are directly asserting that JWT_SECRET is a string.
-      // With your strict tsconfig, this is the most reliable way to handle it.
       const jwtSecret = process.env.JWT_SECRET;
       
       if (!jwtSecret) {
@@ -27,8 +27,14 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
       if (!decoded.id || typeof decoded.id !== 'string') {
         throw new Error('Invalid token payload.');
       }
-
-      req.user = await User.findById(decoded.id).select('-password') as IUser;
+      
+      // FIX: Check if user is found before assigning to req.user
+      const foundUser = await User.findById(decoded.id).select('-password');
+      if (foundUser) {
+        req.user = foundUser;
+      } else {
+        throw new Error('User not found');
+      }
 
       next();
     } catch (error) {

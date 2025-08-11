@@ -1,8 +1,10 @@
+// client/src/controllers/userController.ts
+
 import { Request, Response } from 'express';
-import { User, IUser } from '../models/User'; // Ensure IUser is imported if used in controller
-import { AuthRequest } from '../middleware/authMiddleware'; // <-- THIS IS THE MISSING IMPORT
-import bcrypt from 'bcryptjs'; // Needed for password comparison in User model, but good to have if any future direct use
-import jwt from 'jsonwebtoken'; // Needed for token generation in User model, but good to have if any future direct use
+import { User, IUser } from '../models/User';
+import { AuthRequest } from '../middleware/authMiddleware'; // <-- ADD THIS IMPORT
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 
 // @desc    Register a new user

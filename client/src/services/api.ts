@@ -1,3 +1,5 @@
+// client/src/services/api.ts
+
 import axios from 'axios';
 import type { 
   DonationData, 
@@ -53,6 +55,12 @@ export const apiService = {
     getHistory: async (limit: number = 10) => {
       const response = await apiClient.get<DonationData[]>(`/donations/history?limit=${limit}`);
       return response.data;
+    },
+    
+    // ADDED: The new method to fetch a user's donation history by email
+    getHistoryByEmail: async (email: string) => {
+      const response = await apiClient.get<DonationData[]>(`/donations/history?email=${encodeURIComponent(email)}`);
+      return response.data;
     }
   },
 
@@ -71,7 +79,6 @@ export const apiService = {
       return response.data;
     },
 
-    // ADDED: The missing getChild method to fetch a single child by ID
     getChild: async (child_id: string) => {
       const response = await apiClient.get<Child>(`/children/${child_id}`);
       return response.data;

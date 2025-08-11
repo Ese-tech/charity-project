@@ -32,6 +32,7 @@ export interface DonationData {
   category: 'general' | 'disaster' | 'sponsor' | 'items'; // Updated with new category
   paymentMethod?: PaymentMethod; // Made optional
   childId?: string;
+  createdAt?: string;
 }
 
 export interface DonationResponse {
